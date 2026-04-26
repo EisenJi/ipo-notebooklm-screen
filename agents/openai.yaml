@@ -1,0 +1,7 @@
+interface:
+  display_name: "IPO NotebookLM Screen"
+  short_description: "IPO materials to decision memo"
+  default_prompt: "Use $ipo-notebooklm-screen to collect IPO materials, adapt the diligence questions to the issuer, query NotebookLM, and produce a markdown subscription decision table."
+
+policy:
+  allow_implicit_invocation: true

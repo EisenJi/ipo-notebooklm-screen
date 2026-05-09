@@ -85,11 +85,38 @@ python3 scripts/cninfo_fetch.py \
   --reporting-year 2026
 ```
 
+Auto-resolve `org_id` (no manual lookup needed):
+
+```bash
+python3 scripts/cninfo_fetch.py \
+  --stock "铜峰电子,铜峰电子,10_peer_segment_a,latest" \
+  --output-root /tmp/issuer-name \
+  --reporting-year 2026
+```
+
 Practical rule for this script:
 
-- It does not do name/code lookup.
-- You must provide `code` and `org_id`.
+- **4-part mode** (recommended): `code,name,role,scope` — `org_id` and `market` are auto-resolved via `orgid_resolver.py`.
+- **6-part mode** (legacy): `code,org_id,market,name,role,scope` — use only when auto-resolution fails.
 - It writes one `manifest.json` per peer folder.
+
+**Peer discovery** (find comparables without manual research):
+
+```bash
+python3 scripts/peer_discovery.py \
+  --prospectus-text /path/to/prospectus.txt \
+  --llm-candidates "东材科技" "铜峰电子" "大东南" \
+  --user-candidates "法拉电子" \
+  --max-results 10 \
+  --output /tmp/peers.json
+```
+
+Sources (in priority order):
+1. Prospectus explicit comparable companies (regex extraction)
+2. LLM / knowledge-base candidate names
+3. User-provided overrides
+
+The module resolves candidate names to tradeable A-share codes + `org_id`s via `orgid_resolver.py`.
 
 If a source is HTML-only, either:
 

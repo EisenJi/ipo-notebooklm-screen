@@ -3,6 +3,8 @@
 > A repeatable diligence pipeline for A-share and Hong Kong IPOs.
 > Collect prospectuses, peer financials, and policy documents; optionally hand them to a NotebookLM backend; produce a markdown participate-or-skip decision table.
 
+**Inspired by:** [Min Li's X post on NotebookLM IPO screening](https://x.com/MinLiBuilds/status/2046002143937941988) — adapted into an agent-executable, backend-decoupled workflow.
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -61,7 +63,7 @@ This skill turns a named IPO candidate into a repeatable diligence package and a
 | **Backend decoupling** | Stable `manifest_only` path always works; `notebooklm` is optional and gated by policy. |
 | **Auto-upgrade** | `auto` policy switches to `notebooklm` when material scale or complexity warrants it. |
 | **Source scope control** | Uses `--source-ids` to limit each question to the smallest relevant source set. |
-| **CLI instability fallback** | If NotebookLM client times out, switch to web UI for reading; Codex still summarizes. |
+| **CLI instability fallback** | If NotebookLM client times out, switch to web UI for reading; the agent still summarizes. |
 | **CNInfo integration** | `scripts/cninfo_fetch.py` fetches peer reports from 巨潮资讯网 with one command. |
 | **Auto-clone dependency** | If `notebooklm-client` source build is missing, the skill auto-clones and builds it. |
 

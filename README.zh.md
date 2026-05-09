@@ -3,6 +3,8 @@
 > 可复用的 A 股与港股 IPO 尽调流水线。
 > 收集招股书、同行财报、政策文件；可选推送至 NotebookLM 后端；输出 markdown 形式的参与/观望/放弃决策表。
 
+**灵感来源：** [Min Li 在 X 上关于 NotebookLM IPO 筛选的推文](https://x.com/MinLiBuilds/status/2046002143937941988) — 已适配为 agent 可执行、后端解耦的工作流。
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -61,7 +63,7 @@
 | **后端解耦** | 稳定的 `manifest_only` 路径始终可用；`notebooklm` 仅为可选。 |
 | **自动升级** | `auto` 策略在材料规模或复杂度达标时自动切换到 `notebooklm`。 |
 | **Source 范围控制** | 通过 `--source-ids` 将每个问题限制在最小相关材料集。 |
-| **CLI 不稳定时降级** | 若客户端超时，切换至网页端查看答案，由 Codex 汇总。 |
+| **CLI 不稳定时降级** | 若客户端超时，切换至网页端查看答案，由 agent 汇总。 |
 | **巨潮集成** | `scripts/cninfo_fetch.py` 一键抓取同行报告。 |
 | **自动克隆依赖** | 若本地缺少 `notebooklm-client`，skill 自动克隆并构建。 |
 

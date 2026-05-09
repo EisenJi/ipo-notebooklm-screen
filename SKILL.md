@@ -1,11 +1,13 @@
 ---
 name: ipo-notebooklm-screen
-description: Collect and analyze IPO diligence materials for a specific issuer, especially A-share and Hong Kong IPOs. Use when Codex needs to gather prospectuses, issuance/placement notices, peer financials, policy documents, management interviews, and historical financing clues; adapt a standard set of IPO diligence questions to the issuer; optionally hand materials to a NotebookLM backend; and produce a markdown participate-or-skip subscription decision table.
+description: Collect and analyze IPO diligence materials for a specific issuer, especially A-share and Hong Kong IPOs. Use when the agent (Codex, Hermes, or other) needs to gather prospectuses, issuance/placement notices, peer financials, policy documents, management interviews, and historical financing clues; adapt a standard set of IPO diligence questions to the issuer; optionally hand materials to a NotebookLM backend; and produce a markdown participate-or-skip subscription decision table.
 ---
 
 # IPO NotebookLM Screen
 
 Use this skill to turn a named IPO candidate into a repeatable diligence package and a final markdown decision table.
+
+**Inspired by:** [Min Li's X post on NotebookLM IPO screening](https://x.com/MinLiBuilds/status/2046002143937941988) — adapted into an agent-executable, backend-decoupled workflow.
 
 Default assumption:
 

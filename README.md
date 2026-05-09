@@ -85,7 +85,29 @@ Requirements:
 
 ---
 
-## Quick Start
+## Quick Start (Agent-Driven)
+
+The intended use is: **you tell an AI agent the issuer name, and the agent runs the full pipeline.**
+
+### Example prompts
+
+```
+"帮我调查一下下周要申购的嘉德利"
+"Run an IPO screen for 嘉德利 (603435), A-share主板"
+"Should I subscribe to the Jiadeli IPO next week?"
+```
+
+The agent (Codex, Hermes, Claude Code, etc.) will:
+
+1. Load this skill automatically.
+2. Resolve the issuer scope (name, market, stage, business lines).
+3. Collect official materials — prospectus, issuance notices, peer reports — via `scripts/cninfo_fetch.py` and `scripts/peer_discovery.py`.
+4. Optionally hand materials to a NotebookLM backend.
+5. Produce a markdown decision table: `Participate`, `Watch`, or `Skip`.
+
+### Manual CLI mode (optional)
+
+If you prefer to run scripts directly:
 
 ```bash
 # 1. Check environment
@@ -105,6 +127,29 @@ python3 scripts/run_ipo_screen.py --spec my-spec.json --backend notebooklm --bac
 ---
 
 ## Usage
+
+### Agent-driven workflow (recommended)
+
+The skill is designed to be **loaded and executed by an AI agent** (Codex, Hermes, Claude Code, etc.). The agent follows the workflow defined in `SKILL.md`:
+
+1. **Scope** — Determine issuer, market, stage, business lines, peer set.
+2. **Gather** — Collect prospectus, issuance notices, peer financials, policy docs.
+3. **Organize** — Build a clean materials folder with manifests.
+4. **Analyze** — Optionally hand materials to NotebookLM; or analyze locally.
+5. **Decide** — Produce a markdown decision table.
+
+Key scripts the agent uses internally:
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/preflight.py` | Check environment readiness |
+| `scripts/orgid_resolver.py` | Resolve stock code/name → CNInfo `org_id` |
+| `scripts/peer_discovery.py` | Find comparable companies from prospectus + LLM |
+| `scripts/cninfo_fetch.py` | Download peer reports from 巨潮资讯网 |
+| `scripts/notebooklm_adapter.py` | Hand materials to NotebookLM backend |
+| `scripts/run_ipo_screen.py` | Orchestrate the full pipeline |
+
+### Manual CLI mode
 
 ### 1. Preflight check
 

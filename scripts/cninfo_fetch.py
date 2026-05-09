@@ -15,8 +15,8 @@ from typing import Iterable
 import httpx
 
 
-QUERY_URL = "http://www.cninfo.com.cn/new/hisAnnouncement/query"
-DOWNLOAD_ROOT = "http://static.cninfo.com.cn/"
+QUERY_URL = "https://www.cninfo.com.cn/new/hisAnnouncement/query"
+DOWNLOAD_ROOT = "https://static.cninfo.com.cn/"
 
 
 def _default_headers() -> dict[str, str]:
@@ -27,9 +27,9 @@ def _default_headers() -> dict[str, str]:
         ),
         "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
         "X-Requested-With": "XMLHttpRequest",
-        "Origin": "http://www.cninfo.com.cn",
+        "Origin": "https://www.cninfo.com.cn",
         "Referer": (
-            "http://www.cninfo.com.cn/new/commonUrl/pageOfSearch"
+            "https://www.cninfo.com.cn/new/commonUrl/pageOfSearch"
             "?url=disclosure/list/search&lastPage=index"
         ),
     }
@@ -50,16 +50,20 @@ class CninfoFetcher:
         self.client = httpx.Client(headers=_default_headers(), timeout=httpx.Timeout(60.0))
 
     def build_payload(self, request: ReportRequest, *, category: str, searchkey: str, se_date: str) -> dict[str, object]:
+        # CNInfo uses 'sse' for Shanghai, 'szse' for Shenzhen, 'hke' for Hong Kong
+        column = request.market
+        if column == "shj":
+            column = "sse"
         return {
             "pageNum": 0,
             "pageSize": 30,
-            "column": request.market,
+            "column": column,
             "tabName": "fulltext",
             "plate": "",
             "stock": f"{request.code},{request.org_id}",
-            "searchkey": "" if request.market == "hke" else searchkey,
+            "searchkey": "" if column == "hke" else searchkey,
             "secid": "",
-            "category": "" if request.market == "hke" else category,
+            "category": "" if column == "hke" else category,
             "trade": "",
             "seDate": se_date,
             "sortName": "",
@@ -244,18 +248,36 @@ def sanitize_filename(value: str) -> str:
 
 def parse_request(raw: str) -> ReportRequest:
     parts = [part.strip() for part in raw.split(",")]
-    if len(parts) != 6:
-        raise ValueError(
-            "--stock must be `code,org_id,market,label,role,scope` "
-            "(scope: latest|annual_only|periodic_only)"
+    if len(parts) == 6:
+        return ReportRequest(
+            code=parts[0],
+            org_id=parts[1],
+            market=parts[2],
+            label=parts[3],
+            role=parts[4],
+            scope=parts[5],
         )
-    return ReportRequest(
-        code=parts[0],
-        org_id=parts[1],
-        market=parts[2],
-        label=parts[3],
-        role=parts[4],
-        scope=parts[5],
+    # Auto-resolve org_id if only code+label+role+scope provided (4 parts)
+    if len(parts) == 4:
+        from orgid_resolver import resolve
+        resolved = resolve(parts[0])
+        if not resolved or not resolved.get("org_id"):
+            raise ValueError(
+                f"Could not resolve org_id for {parts[0]}. "
+                "Provide 6 parts (code,org_id,market,label,role,scope) "
+                "or ensure the stock name/code is searchable on CNInfo."
+            )
+        return ReportRequest(
+            code=resolved["code"],
+            org_id=resolved["org_id"],
+            market=resolved["market"],
+            label=parts[1],
+            role=parts[2],
+            scope=parts[3],
+        )
+    raise ValueError(
+        "--stock must be `code,org_id,market,label,role,scope` (6 parts) "
+        "or `code,label,role,scope` (4 parts, auto-resolve org_id)"
     )
 
 

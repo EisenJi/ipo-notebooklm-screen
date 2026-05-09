@@ -1,6 +1,6 @@
 ---
 name: ipo-notebooklm-screen
-description: Collect and analyze IPO diligence materials for a specific issuer, especially A-share and Hong Kong IPOs. Use when Codex needs to gather prospectuses, issuance/placement notices, peer financials, policy documents, management interviews, and historical financing clues; adapt a standard set of IPO diligence questions to the issuer; feed the materials into NotebookLM through notebooklm-client; and produce a markdown participate-or-skip subscription decision table.
+description: Collect and analyze IPO diligence materials for a specific issuer, especially A-share and Hong Kong IPOs. Use when Codex needs to gather prospectuses, issuance/placement notices, peer financials, policy documents, management interviews, and historical financing clues; adapt a standard set of IPO diligence questions to the issuer; optionally hand materials to a NotebookLM backend; and produce a markdown participate-or-skip subscription decision table.
 ---
 
 # IPO NotebookLM Screen
@@ -74,6 +74,21 @@ issuer-name/
 
 Keep a short manifest of each file's purpose and source URL.
 
+When peer reports come from CNInfo, prefer using the local fetcher:
+
+```bash
+python3 scripts/cninfo_fetch.py \
+  --stock "000333,9900005965,szse,美的集团,10_peer_segment_a,latest" \
+  --output-root /tmp/issuer-name \
+  --reporting-year 2026
+```
+
+Practical rule for this script:
+
+- It does not do name/code lookup.
+- You must provide `code` and `org_id`.
+- It writes one `manifest.json` per peer folder.
+
 If a source is HTML-only, either:
 
 - Feed the URL directly to NotebookLM, or
@@ -85,14 +100,60 @@ Preference order for NotebookLM ingestion:
 2. Official exchange or IR URL
 3. Media URL only when no better primary source is available
 
-### 4. Feed materials into NotebookLM
+### 4. Hand materials to a backend
 
-Use the installed `notebooklm-client` when it exposes the needed commands. If the global CLI lacks `--file`, use the local source build that supports file upload.
+Do not hardwire the workflow to NotebookLM.
+
+Use a backend boundary:
+
+- `manifest_only`: default and most stable
+- `notebooklm`: optional and more fragile
+
+Rule:
+
+- First finish collection and manifest generation.
+- Then decide whether to pass the materials to `notebooklm`.
+- If the NotebookLM client looks unstable, stop at `manifest_only`.
+
+Backend policy:
+
+- `required`: use NotebookLM if the environment permits it
+- `auto`: let the runner decide based on scale and objective
+- `forbid`: stay local and do not use NotebookLM
+
+Auto-upgrade conditions in the current runner:
+
+- two or more notebooks
+- ten or more total sources
+- three or more peer `cninfo_reports` sources
+- explicit objective mentioning `NotebookLM`, `source-ids`, token saving, or multi-round analysis, but only when the material set is already moderately large
+
+Auto-upgrade safety gate:
+
+- do not switch to `notebooklm` unless a file-capable client exists
+- if every notebook already has `notebook_id`, reuse them
+- otherwise require a file-capable client that also supports create
+- if these conditions are not met, stay on `manifest_only` and record why
 
 Known practical rule from this environment:
 
 - Global `notebooklm-client 0.2.0` exposes `--url`, `--text`, `--topic`
-- The local source build at `/home/alice/codes/notebooklm-client` exposes `--file` and `source add --file`
+- A local source build (auto-discovered or auto-cloned) exposes `source add --file`
+- The local source build does not expose `create` in CLI help, but this skill provides a helper-backed create path via the local library API
+- `configure` is still not confirmed in this environment
+- The skill auto-clones `https://github.com/icebear0828/notebooklm-client.git` to `~/.codex/skills/notebooklm-client` if no local build is found
+
+Sandbox caveat:
+
+- these checks are capability-oriented
+- later runtime failure may still come from sandboxed network restrictions, not from missing NotebookLM features
+
+Before using the `notebooklm` backend, run:
+
+```bash
+python3 scripts/preflight.py
+python3 scripts/notebooklm_adapter.py inspect --needs-file
+```
 
 Typical commands:
 
@@ -103,17 +164,29 @@ notebooklm list --transport http
 For local file upload with the source build:
 
 ```bash
-cd /home/alice/codes/notebooklm-client
-node dist/cli.js analyze --transport http --file /abs/path/to/file.pdf --question "What is this file?"
+node "$(python3 -c 'from notebooklm_adapter import _find_client_repo; r=_find_client_repo(); print(r/"dist/cli.js" if r else "")')" analyze --transport http --file /abs/path/to/file.pdf --question "What is this file?"
 ```
 
 For adding more files to an existing notebook:
 
 ```bash
-cd /home/alice/codes/notebooklm-client
-node dist/cli.js source add <notebook-id> --transport http --file /abs/path/to/file.pdf
-node dist/cli.js source add <notebook-id> --transport http --url "https://example.com/page"
+node "$(python3 -c 'from notebooklm_adapter import _find_client_repo; r=_find_client_repo(); print(r/"dist/cli.js" if r else "")')" source add <notebook-id> --transport http --file /abs/path/to/file.pdf
+node "$(python3 -c 'from notebooklm_adapter import _find_client_repo; r=_find_client_repo(); print(r/"dist/cli.js" if r else "")')" source add <notebook-id> --transport http --url "https://example.com/page"
 ```
+
+If the current client does not support notebook creation:
+
+- Reuse an existing notebook id, or
+- Stop after material collection and manifest generation
+
+This is not a failure. The stable path is to keep the workflow successful with local manifests only.
+
+Hard rule:
+
+- If policy is `required`, do not skip NotebookLM based on subjective judgment.
+- If policy is `auto` and the auto-upgrade conditions fire, do not silently stay on `manifest_only`.
+- In both cases, verify the environment first; only then may you fall back if the backend is truly unavailable.
+- `required` should fail early during planning if NotebookLM is not safely executable.
 
 Notebook construction rules:
 
@@ -226,6 +299,40 @@ If `notebooklm-client` can create notebooks and add sources but does not reliabl
 - Continue the workflow by summarizing those answers into the markdown decision table.
 
 Treat this as a normal fallback path, not as a failure of the overall skill.
+
+### Scripted runner
+
+If the user wants a semi-automated run, use:
+
+```bash
+python3 scripts/run_ipo_screen.py --spec assets/ipo-workflow-spec.example.json
+```
+
+This defaults to `manifest_only`.
+
+If you explicitly want NotebookLM:
+
+```bash
+python3 scripts/run_ipo_screen.py --spec assets/ipo-workflow-spec.example.json --backend notebooklm
+```
+
+If you want to force NotebookLM by policy:
+
+```bash
+python3 scripts/run_ipo_screen.py \
+  --spec assets/ipo-workflow-spec.example.json \
+  --backend-policy required
+```
+
+Auto-clone behavior:
+
+- If no local notebooklm-client build is found, the skill auto-clones it to `~/.codex/skills/notebooklm-client` and runs `npm install && npm run build`
+- Override locations with `NOTEBOOKLM_CLIENT_ROOT` or `NOTEBOOKLM_CLIENT_ENTRY` if needed
+
+Current constraint:
+
+- `notebooklm` is safe only when the chosen client supports file upload
+- If notebook creation is unsupported, the spec must provide an existing `notebook_id`
 
 ### Historical financing valuation gaps
 

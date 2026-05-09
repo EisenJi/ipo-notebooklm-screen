@@ -1,0 +1,34 @@
+{
+  "issuer": "示例发行人",
+  "workspace": "../tmp/ipo-screen-demo",
+  "backend_policy": "auto",
+  "backend": "manifest_only",
+  "analysis_objective": "多轮同行比较，必要时切换到 NotebookLM 节约上下文和 token。",
+  "default_persona_prompt": "./ipo_analyst_prompt.txt",
+  "notebooks": [
+    {
+      "title": "示例发行人-主业同行比较",
+      "persona_prompt": "./ipo_analyst_prompt.txt",
+      "sources": [
+        {
+          "kind": "file",
+          "path": "/abs/path/to/prospectus.pdf"
+        },
+        {
+          "kind": "url",
+          "url": "https://example.com/issuer-risk-announcement"
+        },
+        {
+          "kind": "cninfo_reports",
+          "code": "000333",
+          "org_id": "9900005965",
+          "market": "szse",
+          "label": "美的集团",
+          "role": "10_peer_segment_a",
+          "scope": "latest",
+          "reporting_year": 2026
+        }
+      ]
+    }
+  ]
+}

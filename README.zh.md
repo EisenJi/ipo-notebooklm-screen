@@ -1,9 +1,13 @@
 # IPO NotebookLM Screen
 
-> 可复用的 A 股与港股 IPO 尽调流水线。
+> 可复用的 A 股 IPO 尽调流水线。
 > 收集招股书、同行财报、政策文件；可选推送至 NotebookLM 后端；输出 markdown 形式的参与/观望/放弃决策表。
+>
+> **范围：** 目前仅支持 A 股。港股支持尚未实现（缺少 hkexnews.hk 抓取器）。
 
 **灵感来源：** [Min Li 在 X 上关于 NotebookLM IPO 筛选的推文](https://x.com/MinLiBuilds/status/2046002143937941988) — 已适配为 agent 可执行、后端解耦的工作流。
+
+[English](README.md) | **中文**
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
@@ -57,7 +61,7 @@
 
 | 特性 | 说明 |
 |---------|-------------|
-| **市场感知** | 自动区分 A 股与港股 IPO 的问题集。 |
+| **市场感知** | A 股 IPO 专用问题集（港股尚未支持）。 |
 | **多业务线拆分** | 若不同业务线需要不同同行组，每个线独立创建 notebook。 |
 | **PDF 优先** | 优先使用官方 PDF，仅在 PDF 不可获时退而使用 URL。 |
 | **后端解耦** | 稳定的 `manifest_only` 路径始终可用；`notebooklm` 仅为可选。 |

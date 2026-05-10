@@ -7,6 +7,8 @@
 
 **Inspired by:** [Min Li's X post on NotebookLM IPO screening](https://x.com/MinLiBuilds/status/2046002143937941988) — adapted into an agent-executable, backend-decoupled workflow.
 
+**English** | [中文](README.zh.md)
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js 18+](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

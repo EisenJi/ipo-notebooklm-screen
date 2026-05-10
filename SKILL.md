@@ -113,10 +113,20 @@ python3 scripts/peer_discovery.py \
 
 Sources (in priority order):
 1. Prospectus explicit comparable companies (regex extraction)
-2. LLM / knowledge-base candidate names
+2. **Agent knowledge-base candidate generation** — the agent itself uses its own reasoning to suggest peers based on the issuer's business description, then passes them via `--llm-candidates`
 3. User-provided overrides
 
 The module resolves candidate names to tradeable A-share codes + `org_id`s via `orgid_resolver.py`.
+
+**How the agent generates Layer-2 candidates:**
+
+The agent reads the issuer's business description from the prospectus (or asks NotebookLM to summarize it), then uses its own knowledge to suggest 5-10 A-share peers. Example reasoning chain:
+
+- Keywords from prospectus: "BOPP电工膜", "薄膜电容器", "电容膜"
+- Agent knowledge: 东材科技 (601208) 是电子材料龙头，有电容膜业务；铜峰电子 (600237) 是老牌薄膜电容器材料企业；大东南 (002263) 有 BOPP 薄膜产能
+- Pass these names to `--llm-candidates` for resolution and validation
+
+No external LLM API call is needed — the agent itself is the LLM.
 
 If a source is HTML-only, either:
 

@@ -1,6 +1,6 @@
 ---
 name: ipo-notebooklm-screen
-description: Collect and analyze IPO diligence materials for a specific issuer, especially A-share and Hong Kong IPOs. Use when the agent (Codex, Hermes, or other) needs to gather prospectuses, issuance/placement notices, peer financials, policy documents, management interviews, and historical financing clues; adapt a standard set of IPO diligence questions to the issuer; optionally hand materials to a NotebookLM backend; and produce a markdown participate-or-skip subscription decision table.
+description: Collect and analyze IPO diligence materials for a specific A-share issuer. Use when the agent (Codex, Hermes, or other) needs to gather prospectuses, issuance/placement notices, peer financials, policy documents, management interviews, and historical financing clues; adapt a standard set of IPO diligence questions to the issuer; optionally hand materials to a NotebookLM backend; and produce a markdown participate-or-skip subscription decision table. Currently A-share only; Hong Kong IPO support is not yet implemented.
 ---
 
 # IPO NotebookLM Screen
@@ -22,7 +22,7 @@ Default assumption:
 Determine:
 
 - Issuer name
-- Listing market: A-share or Hong Kong by default; infer from ticker, exchange, filing venue, or wording
+- Listing market: A-share only for now. Infer from ticker (6xxxxx / 0xxxxx / 3xxxxx), exchange, or filing venue
 - Current stage: filed, hearing passed, bookbuilding, pricing, or listed
 - Main business lines
 - Peer set, split by business line if the issuer is multi-segment
@@ -249,7 +249,7 @@ Read [references/question-adaptation.md](./references/question-adaptation.md) be
 
 Critical rule:
 
-- For Hong Kong IPOs, ask about `cornerstone investors`.
+- Hong Kong IPOs are not yet supported (no automated fetcher for hkexnews.hk).
 - For A-share IPOs, replace that with `strategic placement investors`, `offline inquiry / bookbuilding structure`, and `lockup arrangements`.
 
 Question design rules:

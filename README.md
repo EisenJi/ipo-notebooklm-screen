@@ -1,7 +1,9 @@
 # IPO NotebookLM Screen
 
-> A repeatable diligence pipeline for A-share and Hong Kong IPOs.
+> A repeatable diligence pipeline for A-share IPOs.
 > Collect prospectuses, peer financials, and policy documents; optionally hand them to a NotebookLM backend; produce a markdown participate-or-skip decision table.
+>
+> **Scope:** Currently A-share only. Hong Kong IPO support is planned but not yet implemented (no hkexnews.hk fetcher).
 
 **Inspired by:** [Min Li's X post on NotebookLM IPO screening](https://x.com/MinLiBuilds/status/2046002143937941988) — adapted into an agent-executable, backend-decoupled workflow.
 
